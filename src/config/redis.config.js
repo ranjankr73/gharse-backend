@@ -1,14 +1,15 @@
 import Redis from "ioredis";
 import config from "./env.config.js";
 
-const redis = new Redis({
-    host: config.REDIS_HOST,
-    port: config.REDIS_PORT,
-    password: config.REDIS_PASSWORD || undefined,
+const redis = new Redis(config.REDIS_URL, {
+    maxRetriesPerRequest: null,
+
     retryStrategy(times) {
         const delay = Math.min(times * 50, 2000);
         return delay;
     },
+
+    enableReadyCheck: true,
 });
 
 redis.on("connect", () => {

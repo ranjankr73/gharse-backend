@@ -22,6 +22,10 @@ if (!process.env.MONGODB_URI) {
     throw new Error("MONGODB_URI is not defined in environment variable");
 }
 
+if (!process.env.REDIS_URL) {
+    throw new Error("REDIS_URL is not defined in environment variable");
+}
+
 if (!process.env.REDIS_HOST) {
     throw new Error("REDIS_HOST is not defined in environment variable");
 }
@@ -63,6 +67,7 @@ const config = {
     NODE_ENV: process.env.NODE_ENV,
     CLIENT_ORIGIN: process.env.CLIENT_ORIGIN,
     MONGODB_URI: process.env.MONGODB_URI,
+    REDIS_URL: process.env.REDIS_URL,
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: parseInt(process.env.REDIS_PORT),
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
