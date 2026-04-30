@@ -18,7 +18,7 @@ export const register = async (req, res) => {
             });
         }
 
-        const ALLOWED_ROLES = ["customer", "shopOwner"];
+        const ALLOWED_ROLES = ["customer", "partner", "rider"];
         if (!ALLOWED_ROLES.includes(role)) {
             return res.status(400).json({
                 message: "Invalid role",
@@ -64,7 +64,7 @@ export const register = async (req, res) => {
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
 
-        await redis.set(
+        const redisData = await redis.set(
             `session:${session._id.toString()}`,
             JSON.stringify({
                 userId: user._id,

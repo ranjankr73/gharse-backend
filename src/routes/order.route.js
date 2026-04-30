@@ -22,10 +22,10 @@ orderRouter.get("/my/:orderId", protect, authorizeRoles("customer"), getOrderByI
 orderRouter.post("/my/:orderId/cancel", protect, authorizeRoles("customer"), cancelOrder);
 
 // ── Shop Owner ────────────────────────────────────────────
-orderRouter.get("/shop/:shopId", protect, authorizeRoles("shopOwner"), getShopOrders);
-orderRouter.get("/shop/:shopId/stats", protect, authorizeRoles("shopOwner"), getShopStats);
-orderRouter.patch("/shop/:shopId/:orderId/status", protect, authorizeRoles("shopOwner"), updateOrderStatus);
-orderRouter.get("/shop/:shopId/:orderId", protect, authorizeRoles("shopOwner"), getShopOrderById);
+orderRouter.get("/shop/:shopId", protect, authorizeRoles("partner"), getShopOrders);
+orderRouter.get("/shop/:shopId/stats", protect, authorizeRoles("partner"), getShopStats);
+orderRouter.patch("/shop/:shopId/:orderId/status", protect, authorizeRoles("partner"), updateOrderStatus);
+orderRouter.get("/shop/:shopId/:orderId", protect, authorizeRoles("partner"), getShopOrderById);
 
 // ── Admin ─────────────────────────────────────────────────
 orderRouter.get("/admin", protect, authorizeRoles("admin"), adminGetAllOrders);

@@ -23,13 +23,13 @@ productRouter.get("/public/:productId", getPublicProductById);
 productRouter.get("/public/shops/:shopId", getPublicShopProducts);
 
 // ── Shop Owner ────────────────────────────────────────────
-productRouter.get("/shops/:shopId", protect, authorizeRoles("shopOwner"), getMyProducts);
-productRouter.get("/shops/:shopId/:productId", protect, authorizeRoles("shopOwner"), getMyProductById);
-productRouter.post("/shops/:shopId", protect, authorizeRoles("shopOwner"), createProduct);
-productRouter.patch("/shops/:shopId/:productId", protect, authorizeRoles("shopOwner"), updateProduct);
-productRouter.patch("/shops/:shopId/:productId/toggle-availability", protect, authorizeRoles("shopOwner"), toggleProductAvailability);
-productRouter.patch("/shops/:shopId/:productId/stock", protect, authorizeRoles("shopOwner"), updateProductStock);
-productRouter.delete("/shops/:shopId/:productId", protect, authorizeRoles("shopOwner"), deleteProduct);
+productRouter.get("/shops/:shopId", protect, authorizeRoles("partner"), getMyProducts);
+productRouter.get("/shops/:shopId/:productId", protect, authorizeRoles("partner"), getMyProductById);
+productRouter.post("/shops/:shopId", protect, authorizeRoles("partner"), createProduct);
+productRouter.patch("/shops/:shopId/:productId", protect, authorizeRoles("partner"), updateProduct);
+productRouter.patch("/shops/:shopId/:productId/toggle-availability", protect, authorizeRoles("partner"), toggleProductAvailability);
+productRouter.patch("/shops/:shopId/:productId/stock", protect, authorizeRoles("partner"), updateProductStock);
+productRouter.delete("/shops/:shopId/:productId", protect, authorizeRoles("partner"), deleteProduct);
 
 // ── Admin ─────────────────────────────────────────────────
 productRouter.get("/admin", protect, authorizeRoles("admin"), adminGetAllProducts);

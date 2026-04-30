@@ -27,8 +27,8 @@ categoryRouter.delete("/:categoryId", protect, authorizeRoles("admin"), deleteCa
 
 // ── Shop Owner SubCategories ──────────────────────────────
 categoryRouter.get("/shops/:shopId/subcategories", getShopSubCategories);
-categoryRouter.post("/shops/:shopId/subcategories", protect, authorizeRoles("shopOwner"), createSubCategory);
-categoryRouter.patch("/shops/:shopId/subcategories/:subCategoryId", protect, authorizeRoles("shopOwner"), updateSubCategory);
-categoryRouter.delete("/shops/:shopId/subcategories/:subCategoryId", protect, authorizeRoles("shopOwner"), deleteSubCategory);
+categoryRouter.post("/shops/:shopId/subcategories", protect, authorizeRoles("partner"), createSubCategory);
+categoryRouter.patch("/shops/:shopId/subcategories/:subCategoryId", protect, authorizeRoles("partner"), updateSubCategory);
+categoryRouter.delete("/shops/:shopId/subcategories/:subCategoryId", protect, authorizeRoles("partner"), deleteSubCategory);
 
 export default categoryRouter;

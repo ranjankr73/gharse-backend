@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ["admin", "customer", "shopOwner"],
+            enum: ["admin", "customer", "partner", "rider"],
             default: "customer",
         },
         googleId: {
