@@ -36,7 +36,8 @@ const cartSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
-            unique: true,        // one cart per user
+            unique: true, 
+            index: true
         },
         shop: {
             type: mongoose.Schema.Types.ObjectId,
@@ -64,8 +65,6 @@ cartSchema.virtual("totalItems").get(function () {
 
 cartSchema.set("toJSON", { virtuals: true });
 cartSchema.set("toObject", { virtuals: true });
-
-cartSchema.index({ user: 1 });
 
 const Cart = mongoose.model("Cart", cartSchema);
 export default Cart;

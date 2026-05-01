@@ -5,7 +5,7 @@ const redis = new Redis(config.REDIS_URL, {
     maxRetriesPerRequest: null,
 
     retryStrategy(times) {
-        const delay = Math.min(times * 50, 2000);
+        const delay = Math.min(times * 100, 3000);
         return delay;
     },
 

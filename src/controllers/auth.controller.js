@@ -75,7 +75,7 @@ export const register = async (req, res) => {
             7 * 24 * 60 * 60,
         );
 
-        await redis.sadd(`user:sessions:${user._id.toString()}`, session._id.toString());
+        await redis.sadd(`user:${user._id.toString()}:sessions`, session._id.toString());
 
         const accessToken = jwt.sign(
             { id: user._id, role: user.role, session: session._id },
@@ -220,7 +220,7 @@ export const login = async (req, res) => {
             7 * 24 * 60 * 60,
         );
 
-        await redis.sadd(`user:sessions:${user._id.toString()}`, session._id.toString());
+        await redis.sadd(`user:${user._id.toString()}:sessions`, session._id.toString());
 
         const accessToken = jwt.sign(
             {
@@ -313,7 +313,6 @@ export const rotateToken = async (req, res) => {
             .digest("hex");
 
         const session = await Session.findOne({
-            _id: decoded.session,
             refreshToken: hashedRefreshToken,
             isRevoked: false,
         }).select("+refreshToken");
