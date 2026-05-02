@@ -88,7 +88,7 @@ export const register = async (req, res) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: config.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -237,7 +237,7 @@ export const login = async (req, res) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: config.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -377,7 +377,7 @@ export const rotateToken = async (req, res) => {
         res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: config.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -405,7 +405,7 @@ export const logout = async (req, res) => {
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: config.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: "none",
         });
 
         return res.status(200).json({
@@ -441,7 +441,7 @@ export const logoutAll = async (req, res) => {
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: config.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: "none",
         });
 
         return res.status(200).json({
