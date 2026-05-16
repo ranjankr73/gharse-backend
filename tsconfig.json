@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+
+    "rootDir": ".",
+    "outDir": "./dist",
+
+    "strict": true,
+
+    "allowJs": true,
+    "checkJs": false,
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "resolveJsonModule": true,
+
+    "sourceMap": true,
+
+    "skipLibCheck": true,
+    
+    "types": ["node"],
+
+    // "forceConsistentCasingInFileNames": true,
+  },
+
+  "include": [
+    "src/**/*",
+    "server.js",
+    "scripts/**/*"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
