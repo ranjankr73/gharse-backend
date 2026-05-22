@@ -3,15 +3,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 if (!process.env.PORT) {
-    throw new Error(
-        "PORT is not defined in environment variable",
-    );
+    throw new Error("PORT is not defined in environment variable");
 }
 
 if (!process.env.NODE_ENV) {
-    throw new Error(
-        "NODE_ENV is not defined in environment variable",
-    );
+    throw new Error("NODE_ENV is not defined in environment variable");
 }
 
 if (!process.env.CLIENT_ORIGIN) {
@@ -62,6 +58,10 @@ if (!process.env.REFRESH_TOKEN_EXPIRY) {
     );
 }
 
+if (!process.env.GOOGLE_CLIENT_ID) {
+    throw new Error("GOOGLE_CLIENT_ID is not defined in environment variable");
+}
+
 const config = {
     PORT: process.env.PORT,
     NODE_ENV: process.env.NODE_ENV,
@@ -75,6 +75,7 @@ const config = {
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_EXPIRY,
     ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY,
     REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 };
 
 export default config;

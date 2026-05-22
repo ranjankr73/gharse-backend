@@ -1,10 +1,13 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 import User from "../models/user.model.js";
 import Session from "../models/session.model.js";
 import config from "../config/env.config.js";
 import redis from "../config/redis.config.js";
+
+const client = new OAuth2Client(config.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
     try {
@@ -75,7 +78,10 @@ export const register = async (req, res) => {
             7 * 24 * 60 * 60,
         );
 
-        await redis.sadd(`user:${user._id.toString()}:sessions`, session._id.toString());
+        await redis.sadd(
+            `user:${user._id.toString()}:sessions`,
+            session._id.toString(),
+        );
 
         const accessToken = jwt.sign(
             { id: user._id, role: user.role, session: session._id },
@@ -220,7 +226,10 @@ export const login = async (req, res) => {
             7 * 24 * 60 * 60,
         );
 
-        await redis.sadd(`user:${user._id.toString()}:sessions`, session._id.toString());
+        await redis.sadd(
+            `user:${user._id.toString()}:sessions`,
+            session._id.toString(),
+        );
 
         const accessToken = jwt.sign(
             {
@@ -256,6 +265,116 @@ export const login = async (req, res) => {
 
         return res.status(500).json({
             message: "Internal Server Error while logging in user",
+        });
+    }
+};
+
+export const googleAuth = async (req, res) => {
+    try {
+        const { credential, role } = req.body;
+        const ipAddress = req.ip;
+        const userAgent = req.headers["user-agent"];
+
+        if (!credential || !role) {
+            return res.status(400).json({
+                message: "All fields are required",
+            });
+        }
+
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: config.GOOGLE_CLIENT_ID,
+        });
+
+        const { sub, email, name, picture } = ticket.getPayload();
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = new User({
+                fullName: name,
+                email,
+                role,
+                avatarUrl: picture,
+                googleId: sub,
+                authProvider: "google",
+                isEmailVerified: true
+            })
+        }
+
+        const refreshToken = jwt.sign(
+            {
+                id: user._id,
+                role: user.role,
+            },
+            config.REFRESH_TOKEN_SECRET,
+            {
+                expiresIn: config.REFRESH_TOKEN_EXPIRY,
+            },
+        );
+
+        const hashedRefreshToken = crypto
+            .createHash("sha256")
+            .update(refreshToken)
+            .digest("hex");
+
+        const session = await Session.create({
+            user: user._id,
+            refreshToken: hashedRefreshToken,
+            ipAddress,
+            userAgent,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        });
+
+        await redis.set(
+            `session:${session._id.toString()}`,
+            JSON.stringify({
+                userId: user._id,
+                role: user.role,
+                isRevoked: false,
+            }),
+            "EX",
+            7 * 24 * 60 * 60,
+        );
+
+        await redis.sadd(
+            `user:${user._id.toString()}:sessions`,
+            session._id.toString(),
+        );
+
+        const accessToken = jwt.sign(
+            {
+                id: user._id,
+                role: user.role,
+                session: session._id,
+            },
+            config.ACCESS_TOKEN_SECRET,
+            {
+                expiresIn: config.ACCESS_TOKEN_EXPIRY,
+            },
+        );
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: config.NODE_ENV === "production",
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(200).json({
+            message: "User logged in successfully",
+            user: {
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                role: user.role,
+            },
+            token: accessToken,
+        });
+    } catch (error) {
+        console.error("GOOGLE AUTH ERROR: ", error);
+
+        return res.status(500).json({
+            message: "Internal Server Error while authenticating user with Google",
         });
     }
 };
@@ -398,7 +517,10 @@ export const logout = async (req, res) => {
     try {
         await redis.del(`session:${req.user.session.toString()}`);
 
-        await redis.srem(`user:sessions:${req.user.id.toString()}`, req.user.session);
+        await redis.srem(
+            `user:sessions:${req.user.id.toString()}`,
+            req.user.session,
+        );
 
         await Session.findByIdAndUpdate(req.user.session, { isRevoked: true });
 
@@ -422,7 +544,9 @@ export const logout = async (req, res) => {
 
 export const logoutAll = async (req, res) => {
     try {
-        const sessionIds = await redis.sMembers(`user:sessions:${req.user.id.toString()}`);
+        const sessionIds = await redis.sMembers(
+            `user:sessions:${req.user.id.toString()}`,
+        );
         if (sessionIds.length) {
             await Promise.all(
                 sessionIds.map((id) => redis.del(`session:${id}`)),

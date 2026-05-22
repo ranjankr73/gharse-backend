@@ -3,6 +3,7 @@ import { protect, authorizeRoles } from "../middlewares/auth.middleware.js";
 import {
     getMe,
     login,
+    googleAuth,
     createAdminUser,
     logout,
     logoutAll,
@@ -14,6 +15,7 @@ const authRouter = Router();
 
 authRouter.post("/register", register);
 authRouter.post("/login", login);
+authRouter.post("/google", googleAuth)
 authRouter.post(
     "/admin/create-user",
     protect,

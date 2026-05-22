@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
             enum: ["admin", "customer", "partner", "rider"],
             default: "customer",
         },
+        avatarUrl: {
+            type: String,
+            default: null,
+        },
         googleId: {
             type: String,
             sparse: true,
@@ -42,6 +46,10 @@ const userSchema = new mongoose.Schema(
         isActive: {
             type: Boolean,
             default: true,
+        },
+        isEmailVerified: {
+            type: Boolean,
+            default: false
         }
     },
     { timestamps: true },
