@@ -1,0 +1,33 @@
+model Notification {
+    id        String           @id @default(uuid())
+    userId    String
+    type      NotificationType
+    title     String           @db.VarChar(100)
+    body      String           @db.Text
+    metadata  Json?
+    isRead    Boolean          @default(false)
+    readAt    DateTime?        @db.Timestamp()
+    createdAt DateTime         @default(now()) @db.Timestamp()
+    user      User             @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@index([userId])
+    @@index([userId, isRead])
+    @@index([type])
+    @@index([createdAt])
+}
+
+enum NotificationType {
+    ORDER_PLACED
+    ORDER_CONFIRMED
+    ORDER_PREPARING
+    ORDER_READY
+    ORDER_PICKED_UP
+    ORDER_DELIVERED
+    ORDER_CANCELLED
+    PAYMENT_SUCCESS
+    PAYMENT_FAILED
+    REFUND_INITIATED
+    REFUND_COMPLETED
+    PROMO
+    GENERAL
+}

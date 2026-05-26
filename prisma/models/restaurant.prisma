@@ -1,0 +1,66 @@
+model Restaurant {
+    id           String             @id @default(uuid())
+    ownerId      String
+    name         String             @db.VarChar(100)
+    description  String?            @db.Text
+    logo         String?            @db.Text
+    phone        String             @unique @db.VarChar(15)
+    street       String             @db.VarChar(255)
+    city         String             @db.VarChar(100)
+    state        String             @db.VarChar(100)
+    pincode      String             @db.VarChar(10)
+    latitude     Decimal            @db.Decimal(10, 8)
+    longitude    Decimal            @db.Decimal(11, 8)
+    status       Status             @default(CLOSED)
+    isActive     Boolean            @default(true)
+    isVerified   Boolean            @default(false)
+    avgRating    Decimal?           @db.Decimal(3, 2)
+    totalReviews Int                @default(0)
+    timing       RestaurantTiming[]
+    categories   Category[]
+    foodItems    FoodItem[]
+    carts        Cart[]
+    orders       Order[]
+    reviews      Review[]
+    coupons      Coupon[]
+    createdAt    DateTime           @default(now()) @db.Timestamp()
+    updatedAt    DateTime           @updatedAt
+    owner        User               @relation(fields: [ownerId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@index([ownerId])
+    @@index([status])
+    @@index([city])
+    @@index([latitude, longitude])
+    @@index([avgRating])
+}
+
+model RestaurantTiming {
+    id           String     @id @default(uuid())
+    restaurantId String
+    day          DayOfWeek
+    openTime     DateTime   @db.Time()
+    closeTime    DateTime   @db.Time()
+    isClosed     Boolean    @default(false)
+    createdAt    DateTime   @default(now()) @db.Timestamp()
+    updatedAt    DateTime   @updatedAt
+    restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@unique([restaurantId, day])
+    @@index([restaurantId])
+}
+
+enum Status {
+    OPEN
+    CLOSED
+    TEMPORARILY_CLOSED
+}
+
+enum DayOfWeek {
+    SUNDAY
+    MONDAY
+    TUESDAY
+    WEDNESDAY
+    THURSDAY
+    FRIDAY
+    SATURDAY
+}

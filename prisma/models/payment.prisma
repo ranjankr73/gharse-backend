@@ -1,0 +1,63 @@
+model Payment {
+    id              String        @id @default(uuid())
+    customerId      String
+    amount          Decimal       @db.Decimal(10, 2)
+    currency        String        @default("INR") @db.VarChar(3)
+    method          PaymentMethod
+    status          PaymentStatus @default(PENDING)
+    transactionId   String?       @unique
+    gatewayResponse Json?
+    paidAt          DateTime?     @db.Timestamp()
+    failureReason   String?       @db.Text
+    order           Order?
+    refund          Refund?
+    createdAt       DateTime      @default(now()) @db.Timestamp()
+    updatedAt       DateTime      @updatedAt
+    customer        User          @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+    @@index([customerId])
+    @@index([status])
+    @@index([transactionId])
+    @@index([method])
+    @@index([createdAt])
+}
+
+model Refund {
+    id              String       @id @default(uuid())
+    paymentId       String       @unique
+    amount          Decimal      @db.Decimal(10, 2)
+    reason          String       @db.Text
+    status          RefundStatus @default(PENDING)
+    gatewayResponse Json?
+    resolvedBy      String?
+    processedAt     DateTime?    @db.Timestamp()
+    createdAt       DateTime     @default(now()) @db.Timestamp()
+    updatedAt       DateTime     @updatedAt
+    payment         Payment      @relation(fields: [paymentId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+    @@index([paymentId])
+    @@index([status])
+    @@index([createdAt])
+}
+
+enum PaymentMethod {
+    UPI
+    CASH_ON_DELIVERY
+    CREDIT_CARD
+    DEBIT_CARD
+    WALLET
+}
+
+enum PaymentStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    REFUNDED
+}
+
+enum RefundStatus {
+    PENDING
+    APPROVED
+    REJECTED
+    COMPLETED
+}

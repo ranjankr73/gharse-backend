@@ -18,6 +18,10 @@ if (!process.env.MONGODB_URI) {
     throw new Error("MONGODB_URI is not defined in environment variable");
 }
 
+if(!process.env.POSTGRES_URI){
+    throw new Error("POSTGRES_URI is not defined in environment variable");
+}
+
 if (!process.env.REDIS_URL) {
     throw new Error("REDIS_URL is not defined in environment variable");
 }
@@ -67,6 +71,7 @@ const config = {
     NODE_ENV: process.env.NODE_ENV,
     CLIENT_ORIGIN: process.env.CLIENT_ORIGIN,
     MONGODB_URI: process.env.MONGODB_URI,
+    POSTGRES_URI: process.env.POSTGRES_URI,
     REDIS_URL: process.env.REDIS_URL,
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: parseInt(process.env.REDIS_PORT),

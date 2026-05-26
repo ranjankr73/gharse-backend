@@ -1,0 +1,82 @@
+model Category {
+    id           String      @id @default(uuid())
+    restaurantId String?
+    name         String      @db.VarChar(100)
+    description  String?     @db.Text
+    slug         String      @db.VarChar(100)
+    image        String?     @db.Text
+    sortOrder    Int         @default(0)
+    isActive     Boolean     @default(true)
+    foodItems    FoodItem[]
+    createdAt    DateTime    @default(now()) @db.Timestamp()
+    updatedAt    DateTime    @updatedAt
+    restaurant   Restaurant? @relation(fields: [restaurantId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+    @@unique([restaurantId, slug])
+    @@index([restaurantId])
+    @@index([isActive])
+}
+
+model FoodItem {
+    id           String        @id @default(uuid())
+    restaurantId String
+    categoryId   String
+    name         String        @db.VarChar(150)
+    description  String?       @db.Text
+    price        Decimal       @db.Decimal(10, 2)
+    images       String[]
+    isVeg        Boolean       @default(true)
+    isAvailable  Boolean       @default(true)
+    isActive     Boolean       @default(true)
+    sortOrder    Int           @default(0)
+    foodVariants FoodVariant[]
+    addOns       AddOn[]
+    cartItems    CartItem[]
+    orderItems   OrderItem[]
+    createdAt    DateTime      @default(now()) @db.Timestamp()
+    updatedAt    DateTime      @updatedAt
+    category     Category      @relation(fields: [categoryId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@index([restaurantId])
+    @@index([categoryId])
+    @@index([isAvailable, isActive])
+    @@index([isVeg])
+    @@index([price])
+}
+
+model FoodVariant {
+    id          String      @id @default(uuid())
+    foodItemId  String
+    name        String      @db.VarChar(100)
+    description String?     @db.VarChar(255)
+    price       Decimal     @db.Decimal(10, 2)
+    isAvailable Boolean     @default(true)
+    isActive    Boolean     @default(true)
+    sortOrder   Int         @default(0)
+    cartItems   CartItem[]
+    orderItems  OrderItem[]
+    createdAt   DateTime    @default(now()) @db.Timestamp()
+    updatedAt   DateTime    @updatedAt
+    foodItem    FoodItem    @relation(fields: [foodItemId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@index([foodItemId])
+}
+
+model AddOn {
+    id              String           @id @default(uuid())
+    foodItemId      String
+    name            String           @db.VarChar(100)
+    description     String?          @db.VarChar(255)
+    price           Decimal          @db.Decimal(10, 2)
+    isAvailable     Boolean          @default(true)
+    isRequired      Boolean          @default(false)
+    maxQuantity     Int              @default(1)
+    cartItemAddOns  CartItemAddOn[]
+    orderItemAddOns OrderItemAddOn[]
+    createdAt       DateTime         @default(now()) @db.Timestamp()
+    updatedAt       DateTime         @updatedAt
+    foodItem        FoodItem         @relation(fields: [foodItemId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@index([foodItemId])
+}

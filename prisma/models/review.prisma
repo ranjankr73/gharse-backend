@@ -1,0 +1,29 @@
+model Review {
+    id             String      @id @default(uuid())
+    customerId     String
+    orderId        String      @unique
+    restaurantId   String?
+    riderId        String?
+    foodRating     Int
+    deliveryRating Int?
+    comment        String?     @db.Text
+    images         String[]
+    isVisible      Boolean     @default(true)
+    replyText      String?     @db.Text
+    repliedAt      DateTime?   @db.Timestamp()
+    createdAt      DateTime    @default(now()) @db.Timestamp()
+    updatedAt      DateTime    @updatedAt
+    customer       User        @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    order          Order       @relation(fields: [orderId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    restaurant     Restaurant? @relation(fields: [restaurantId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+    rider          Rider?      @relation(fields: [riderId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+    @@unique([orderId, restaurantId])
+    @@unique([orderId, riderId])
+    @@index([customerId])
+    @@index([restaurantId])
+    @@index([riderId])
+    @@index([restaurantId, foodRating])
+    @@index([isVisible])
+    @@index([createdAt])
+}

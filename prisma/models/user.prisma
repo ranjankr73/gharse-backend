@@ -1,0 +1,79 @@
+model User {
+    id              String         @id @default(uuid())
+    name            String         @db.VarChar(50)
+    email           String         @unique @db.VarChar(100)
+    password        String?        @db.VarChar(255)
+    phone           String         @unique @db.VarChar(15)
+    avatarUrl       String?        @db.Text
+    role            Role           @default(CUSTOMER)
+    authProvider    AuthProvider   @default(LOCAL)
+    providerId      String?
+    isActive        Boolean        @default(true)
+    isEmailVerified Boolean        @default(false)
+    sessions        Session[]
+    addresses       Address[]
+    restaurants     Restaurant[]
+    cart            Cart?
+    orders          Order[]
+    riderProfile    Rider?
+    reviews         Review[]
+    couponUsages    CouponUsage[]
+    notifications   Notification[]
+    createdAt       DateTime       @default(now()) @db.Timestamp()
+    updatedAt       DateTime       @updatedAt
+    payments        Payment[]
+
+    @@index([email])
+    @@index([phone])
+    @@index([role])
+    @@index([providerId])
+}
+
+model Session {
+    id           String   @id @default(uuid())
+    userId       String
+    refreshToken String   @db.Text
+    ipAddress    String   @db.VarChar(45)
+    userAgent    String   @db.Text
+    deviceName   String?
+    isRevoked    Boolean  @default(false)
+    expiresAt    DateTime @db.Timestamp()
+    lastUsedAt   DateTime @default(now()) @db.Timestamp()
+    createdAt    DateTime @default(now()) @db.Timestamp()
+    updatedAt    DateTime @updatedAt
+    user         User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@index([userId])
+    @@index([refreshToken])
+}
+
+model Address {
+    id        String   @id @default(uuid())
+    userId    String
+    label     String   @db.VarChar(50)
+    street    String   @db.VarChar(255)
+    city      String   @db.VarChar(100)
+    state     String   @db.VarChar(100)
+    pincode   String   @db.VarChar(10)
+    latitude  Decimal  @db.Decimal(10, 8)
+    longitude Decimal  @db.Decimal(11, 8)
+    isDefault Boolean  @default(false)
+    createdAt DateTime @default(now()) @db.Timestamp()
+    updatedAt DateTime @updatedAt
+    user      User     @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    orders    Order[]
+
+    @@index([userId])
+}
+
+enum Role {
+    ADMIN
+    CUSTOMER
+    PARTNER
+    RIDER
+}
+
+enum AuthProvider {
+    LOCAL
+    GOOGLE
+}

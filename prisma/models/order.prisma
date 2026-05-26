@@ -1,0 +1,99 @@
+model Order {
+    id                 String               @id @default(uuid())
+    customerId         String
+    restaurantId       String
+    riderId            String?
+    couponId           String?
+    status             OrderStatus          @default(PENDING)
+    subTotal           Decimal              @db.Decimal(10, 2)
+    deliveryFee        Decimal              @db.Decimal(10, 2)
+    tax                Decimal              @db.Decimal(10, 2)
+    discount           Decimal              @default(0) @db.Decimal(10, 2)
+    finalAmount        Decimal              @db.Decimal(10, 2)
+    deliveryAddressId  String
+    paymentId          String               @unique
+    deliverySnapshot   Json
+    specialNote        String?              @db.Text
+    orderedAt          DateTime             @default(now()) @db.Timestamp()
+    updatedAt          DateTime             @updatedAt
+    orderItems         OrderItem[]
+    statusHistory      OrderStatusHistory[]
+    couponUsage        CouponUsage?
+    deliveryAssignment DeliveryAssignment?
+    customer           User                 @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    restaurant         Restaurant           @relation(fields: [restaurantId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    rider              Rider?               @relation(fields: [riderId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+    coupon             Coupon?              @relation(fields: [couponId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+    deliveryAddress    Address              @relation(fields: [deliveryAddressId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    payment            Payment              @relation(fields: [paymentId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    review             Review?
+
+    @@index([customerId])
+    @@index([restaurantId])
+    @@index([riderId])
+    @@index([status])
+    @@index([orderedAt])
+    @@index([restaurantId, status])
+    @@index([customerId, orderedAt])
+}
+
+model OrderItem {
+    id           String           @id @default(uuid())
+    orderId      String
+    foodItemId   String
+    variantId    String?
+    quantity     Int              @default(1)
+    unitPrice    Decimal          @db.Decimal(10, 2)
+    totalPrice   Decimal          @db.Decimal(10, 2)
+    foodItemName String           @db.VarChar(150)
+    variantName  String?          @db.VarChar(100)
+    addOns       OrderItemAddOn[]
+    createdAt    DateTime         @default(now()) @db.Timestamp()
+    updatedAt    DateTime         @updatedAt
+    order        Order            @relation(fields: [orderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    foodItem     FoodItem         @relation(fields: [foodItemId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    variant      FoodVariant?     @relation(fields: [variantId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+    @@index([orderId])
+    @@index([foodItemId])
+}
+
+model OrderItemAddOn {
+    id          String    @id @default(uuid())
+    orderItemId String
+    addOnId     String
+    addOnName   String    @db.VarChar(100)
+    quantity    Int       @default(1)
+    unitPrice   Decimal   @db.Decimal(10, 2)
+    createdAt   DateTime  @default(now()) @db.Timestamp
+    updatedAt   DateTime  @updatedAt
+    orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+    addOn       AddOn     @relation(fields: [addOnId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+
+    @@unique([orderItemId, addOnId])
+    @@index([orderItemId])
+}
+
+model OrderStatusHistory {
+    id        String      @id @default(uuid())
+    orderId   String
+    status    OrderStatus
+    note      String?     @db.Text
+    changedBy String?
+    changedAt DateTime    @default(now()) @db.Timestamp()
+    order     Order       @relation(fields: [orderId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+    @@index([orderId])
+    @@index([orderId, changedAt])
+}
+
+enum OrderStatus {
+    PENDING
+    CONFIRMED
+    PREPARING
+    READY_FOR_PICKUP
+    PICKED_UP
+    OUT_FOR_DELIVERY
+    DELIVERED
+    CANCELLED
+}
