@@ -5,8 +5,9 @@
   "main": "server.js",
   "scripts": {
     "dev": "tsx watch server.js",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
+    "migrate:deploy": "prisma migrate deploy",
     "seed:admin": "node scripts/seedAdmin.js"
   },
   "keywords": [

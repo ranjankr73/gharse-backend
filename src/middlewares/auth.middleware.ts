@@ -1,8 +1,27 @@
 import jwt from "jsonwebtoken";
 import config from "../config/env.config.js";
 import redis from "../config/redis.config.js";
+import { Request, Response, NextFunction } from "express";
 
-export const protect = async (req, res, next) => {
+interface DecodedToken extends jwt.JwtPayload {
+    id: string;
+    role: string;
+    session: string;
+}
+
+interface CustomRequest extends Request {
+    user: {
+        id: string;
+        role: string;
+        session: string;
+    };
+}
+
+export const protect = async (
+    req: CustomRequest,
+    res: Response,
+    next: NextFunction,
+) => {
     try {
         const token = req.headers.authorization?.split(" ")[1];
 
@@ -14,7 +33,15 @@ export const protect = async (req, res, next) => {
 
         let decoded;
         try {
-            decoded = jwt.verify(token, config.ACCESS_TOKEN_SECRET);
+            const decodedToken = jwt.verify(token, config.ACCESS_TOKEN_SECRET);
+
+            if (typeof decodedToken === "string") {
+                return res.status(401).json({
+                    message: "Invalid token",
+                });
+            }
+
+            decoded = decodedToken as DecodedToken;
         } catch (err) {
             return res.status(401).json({
                 message: "Invalid or expired token",
@@ -28,7 +55,7 @@ export const protect = async (req, res, next) => {
                 message: "Session expired",
             });
         }
-        
+
         const session = JSON.parse(sessionData);
 
         if (session.isRevoked) {
@@ -53,8 +80,8 @@ export const protect = async (req, res, next) => {
     }
 };
 
-export const authorizeRoles = (...allowedRoles) => {
-    return (req, res, next) => {
+export const authorizeRoles = (...allowedRoles: string[]) => {
+    return (req: CustomRequest, res: Response, next: NextFunction) => {
         if (!allowedRoles.includes(req.user.role)) {
             return res.status(403).json({
                 message: "Forbidden: insufficient permissions",
