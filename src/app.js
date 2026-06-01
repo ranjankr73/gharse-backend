@@ -5,7 +5,7 @@ import cors from "cors";
 
 import config from "./config/env.config.js";
 
-import authRouter from "./routes/auth.route.js";
+import authRouter from "./modules/auth/auth.route.js";
 import shopRouter from "./routes/shop.route.js";
 import categoryRouter from "./routes/category.route.js";
 import productRouter from "./routes/product.route.js";
