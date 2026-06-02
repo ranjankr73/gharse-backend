@@ -1,19 +1,31 @@
-export interface RegisterInput {
-    fullName: string;
+export interface EmailPasswordCredentials {
     email: string;
     password: string;
-    role: "CUSTOMER" | "PARTNER" | "RIDER";
+}
+
+export interface ClientInfo {
     ipAddress: string;
     userAgent: string;
 }
+export interface RegisterInput extends EmailPasswordCredentials, ClientInfo {
+    name: string;
+    role: "CUSTOMER" | "PARTNER" | "RIDER";
+}
 
-export interface RegisterResponse {
-    user: {
-        id: string;
-        fullName: string;
-        email: string;
-        role: string;
-    };
+export type LoginInput = EmailPasswordCredentials & ClientInfo;
+
+export interface AuthenticatedUser {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+}
+
+export interface AuthTokens {
     accessToken: string;
     refreshToken: string;
+}
+
+export interface AuthResponse extends AuthTokens {
+    user: AuthenticatedUser;
 }
