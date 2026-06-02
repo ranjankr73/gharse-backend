@@ -43,7 +43,7 @@ export interface OTPAuthInput extends ClientInfo {
     role: "CUSTOMER" | "PARTNER" | "RIDER";
 }
 
-export interface TokenPayload extends JwtPayload {
+export interface AuthTokenPayload extends JwtPayload {
     sub: string;
     role: string;
     sessionId: string;

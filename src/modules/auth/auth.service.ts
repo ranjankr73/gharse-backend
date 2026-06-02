@@ -14,6 +14,7 @@ import {
     RegisterInput,
     GoogleAuthInput,
     OTPAuthInput,
+    AuthTokenPayload,
 } from "./auth.types.js";
 
 import {
@@ -61,7 +62,11 @@ export const registerUser = async (userData: RegisterInput) => {
     const sessionId = crypto.randomUUID();
 
     const refreshToken = jwt.sign(
-        { id: newUser.id, role: newUser.role, session: sessionId },
+        {
+            sub: newUser.id,
+            role: newUser.role,
+            sessionId: sessionId,
+        } as AuthTokenPayload,
         config.REFRESH_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.REFRESH_TOKEN_EXPIRY,
@@ -99,7 +104,11 @@ export const registerUser = async (userData: RegisterInput) => {
     );
 
     const accessToken = jwt.sign(
-        { id: newUser.id, role: newUser.role, session: session.id },
+        {
+            sub: newUser.id,
+            role: newUser.role,
+            sessionId: session.id,
+        } as AuthTokenPayload,
         config.ACCESS_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.ACCESS_TOKEN_EXPIRY,
@@ -156,7 +165,11 @@ export const loginUser = async (userData: LoginInput) => {
     const sessionId = crypto.randomUUID();
 
     const refreshToken = jwt.sign(
-        { id: existingUser.id, role: existingUser.role, session: sessionId },
+        {
+            sub: existingUser.id,
+            role: existingUser.role,
+            sessionId: sessionId,
+        } as AuthTokenPayload,
         config.REFRESH_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.REFRESH_TOKEN_EXPIRY,
@@ -194,7 +207,11 @@ export const loginUser = async (userData: LoginInput) => {
     );
 
     const accessToken = jwt.sign(
-        { id: existingUser.id, role: existingUser.role, session: session.id },
+        {
+            sub: existingUser.id,
+            role: existingUser.role,
+            sessionId: session.id,
+        } as AuthTokenPayload,
         config.ACCESS_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.ACCESS_TOKEN_EXPIRY,
@@ -260,7 +277,11 @@ export const authenticateWithGoogle = async (userData: GoogleAuthInput) => {
     const sessionId = crypto.randomUUID();
 
     const refreshToken = jwt.sign(
-        { id: existingUser.id, role: existingUser.role, session: sessionId },
+        {
+            sub: existingUser.id,
+            role: existingUser.role,
+            sessionId: sessionId,
+        } as AuthTokenPayload,
         config.REFRESH_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.REFRESH_TOKEN_EXPIRY,
@@ -298,7 +319,11 @@ export const authenticateWithGoogle = async (userData: GoogleAuthInput) => {
     );
 
     const accessToken = jwt.sign(
-        { id: existingUser.id, role: existingUser.role, session: session.id },
+        {
+            sub: existingUser.id,
+            role: existingUser.role,
+            sessionId: session.id,
+        } as AuthTokenPayload,
         config.ACCESS_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.ACCESS_TOKEN_EXPIRY,
@@ -393,7 +418,11 @@ export const authenticateWithPhoneOTP = async (userData: OTPAuthInput) => {
     const sessionId = crypto.randomUUID();
 
     const refreshToken = jwt.sign(
-        { id: existingUser.id, role: existingUser.role, session: sessionId },
+        {
+            sub: existingUser.id,
+            role: existingUser.role,
+            sessionId: sessionId,
+        } as AuthTokenPayload,
         config.REFRESH_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.REFRESH_TOKEN_EXPIRY,
@@ -431,7 +460,11 @@ export const authenticateWithPhoneOTP = async (userData: OTPAuthInput) => {
     );
 
     const accessToken = jwt.sign(
-        { id: existingUser.id, role: existingUser.role, session: session.id },
+        {
+            sub: existingUser.id,
+            role: existingUser.role,
+            sessionId: session.id,
+        } as AuthTokenPayload,
         config.ACCESS_TOKEN_SECRET as jwt.Secret,
         {
             expiresIn: config.ACCESS_TOKEN_EXPIRY,
