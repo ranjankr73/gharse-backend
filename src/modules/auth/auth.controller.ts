@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import ms from "ms";
 import config from "../../config/env.config.js";
-import { registerUser, loginUser } from "./auth.service.js";
+import { registerUser, loginUser, authenticateWithGoogle } from "./auth.service.js";
 
 export const register = async (
     req: Request,
@@ -46,6 +46,38 @@ export const login = async (
         const result = await loginUser({
             email: req.body.email,
             password: req.body.password,
+            ipAddress: req.ip || "unknown",
+            userAgent: req.headers["user-agent"] || "unknown",
+        });
+
+        res.cookie("refreshToken", result.refreshToken, {
+            httpOnly: true,
+            secure: config.NODE_ENV === "production",
+            sameSite: "none",
+            maxAge: ms(config.REFRESH_TOKEN_EXPIRY),
+        });
+
+        res.status(200).json({
+            message: "User logged in successfully",
+            data: {
+                user: result.user,
+                token: result.accessToken,
+            },
+        });
+    } catch (error: unknown) {
+        next(error);
+    }
+};
+
+export const googleAuth = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const result = await authenticateWithGoogle({
+            googleToken: req.body.googleToken,
+            role: req.body.role,
             ipAddress: req.ip || "unknown",
             userAgent: req.headers["user-agent"] || "unknown",
         });

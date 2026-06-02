@@ -29,3 +29,8 @@ export interface AuthTokens {
 export interface AuthResponse extends AuthTokens {
     user: AuthenticatedUser;
 }
+
+export interface GoogleAuthInput extends ClientInfo {
+    googleToken: string;
+    role: "CUSTOMER" | "PARTNER" | "RIDER";
+}

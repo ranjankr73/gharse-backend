@@ -1,4 +1,4 @@
-import { Role } from "../../../generated/prisma/enums.js";
+import { AuthProvider, Role } from "../../../generated/prisma/enums.js";
 import { prisma } from "../../database/postgresql.js";
 
 export const findUserByEmail = async (email: string) => {
@@ -10,10 +10,14 @@ export const findUserByEmail = async (email: string) => {
 };
 
 export const createUser = async (data: {
-    name: string;
-    email: string;
-    password: string;
+    name?: string;
+    email?: string;
+    password?: string;
+    phone?: string;
     role: Role;
+    authProvider: AuthProvider;
+    providerId?: string;
+    avatarUrl?: string;
 }) => {
     return prisma.user.create({
         data,
