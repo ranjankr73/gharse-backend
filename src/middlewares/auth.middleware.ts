@@ -1,54 +1,28 @@
-import jwt from "jsonwebtoken";
-import config from "../config/env.config.js";
 import redis from "../config/redis.config.js";
 import { Request, Response, NextFunction } from "express";
+import { verifyAccessToken } from "../modules/auth/auth.utils.js";
+import { Role } from "../../generated/prisma/enums.js";
+import { SessionPayload } from "../modules/auth/auth.types.js";
 
-interface DecodedToken extends jwt.JwtPayload {
-    id: string;
-    role: string;
-    session: string;
-}
-
-interface CustomRequest extends Request {
-    user: {
-        id: string;
-        role: string;
-        session: string;
-    };
-}
-
-export const protect = async (
-    req: CustomRequest,
+export const authenticate = async (
+    req: Request,
     res: Response,
     next: NextFunction,
 ) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
+        const authHeader = req.headers.authorization;
 
-        if (!token) {
+        if (!authHeader?.startsWith("Bearer ")) {
             return res.status(401).json({
-                message: "Unauthorized",
+                message: "Authentication required",
             });
         }
 
-        let decoded;
-        try {
-            const decodedToken = jwt.verify(token, config.ACCESS_TOKEN_SECRET);
+        const token = authHeader.split(" ")[1];
 
-            if (typeof decodedToken === "string") {
-                return res.status(401).json({
-                    message: "Invalid token",
-                });
-            }
+        const payload = verifyAccessToken(token);
 
-            decoded = decodedToken as DecodedToken;
-        } catch (err) {
-            return res.status(401).json({
-                message: "Invalid or expired token",
-            });
-        }
-
-        const sessionData = await redis.get(`session:${decoded.session}`);
+        const sessionData = await redis.get(`session:${payload.sessionId}`);
 
         if (!sessionData) {
             return res.status(401).json({
@@ -56,7 +30,7 @@ export const protect = async (
             });
         }
 
-        const session = JSON.parse(sessionData);
+        const session: SessionPayload = JSON.parse(sessionData);
 
         if (session.isRevoked) {
             return res.status(401).json({
@@ -64,31 +38,39 @@ export const protect = async (
             });
         }
 
+        if (session.userId !== payload.sub || session.role !== payload.role) {
+            return res.status(401).json({
+                message: "Invalid session",
+            });
+        }
+
         req.user = {
-            id: decoded.id,
-            role: decoded.role,
-            session: decoded.session,
+            sub: payload.sub,
+            role: payload.role,
+            sessionId: payload.sessionId,
         };
 
         next();
-    } catch (error) {
+    } catch (error: unknown) {
         console.error("AUTH MIDDLEWARE ERROR:", error);
 
-        return res.status(500).json({
-            message: "Internal Server Error while authenticating user",
+        return res.status(401).json({
+            message: "Invalid or expired token",
         });
     }
 };
 
-export const authorizeRoles = (...allowedRoles: string[]) => {
-    return (req: CustomRequest, res: Response, next: NextFunction) => {
-        if (!allowedRoles.includes(req.user.role)) {
+export const authorize = (...roles: Role[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        if (!req.user) {
+            return res.status(401).json({
+                message: "Authentication required",
+            });
+        }
+
+        if (!roles.includes(req.user.role)) {
             return res.status(403).json({
-                message: "Forbidden: insufficient permissions",
-                ...(config.NODE_ENV === "development" && {
-                    required: allowedRoles,
-                    current: req.user.role,
-                }),
+                message: "Forbidden",
             });
         }
 
