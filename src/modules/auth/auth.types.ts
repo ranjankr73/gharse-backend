@@ -1,4 +1,5 @@
 import { JwtPayload } from "jsonwebtoken";
+import { Role } from "../../../generated/prisma/enums.js";
 
 export interface EmailPasswordCredentials {
     email: string;
@@ -11,7 +12,7 @@ export interface ClientInfo {
 }
 export interface RegisterInput extends EmailPasswordCredentials, ClientInfo {
     name: string;
-    role: "CUSTOMER" | "PARTNER" | "RIDER";
+    role: Exclude<Role, "ADMIN">;
 }
 
 export type LoginInput = EmailPasswordCredentials & ClientInfo;
@@ -20,7 +21,7 @@ export interface AuthenticatedUser {
     id: string;
     name: string;
     email: string;
-    role: string;
+    role: Role;
 }
 
 export interface AuthTokens {
@@ -34,17 +35,23 @@ export interface AuthResponse extends AuthTokens {
 
 export interface GoogleAuthInput extends ClientInfo {
     googleToken: string;
-    role: "CUSTOMER" | "PARTNER" | "RIDER";
+    role: Exclude<Role, "ADMIN">;
 }
 
 export interface OTPAuthInput extends ClientInfo {
     phoneNumber: string;
     otp: string;
-    role: "CUSTOMER" | "PARTNER" | "RIDER";
+    role: Exclude<Role, "ADMIN">;
 }
 
 export interface AuthTokenPayload extends JwtPayload {
     sub: string;
-    role: string;
+    role: Role;
     sessionId: string;
+}
+
+export interface SessionPayload {
+    userId: string;
+    role: Role;
+    isRevoked: boolean;
 }
