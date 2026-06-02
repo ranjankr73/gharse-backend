@@ -1,3 +1,5 @@
+import { JwtPayload } from "jsonwebtoken";
+
 export interface EmailPasswordCredentials {
     email: string;
     password: string;
@@ -39,4 +41,10 @@ export interface OTPAuthInput extends ClientInfo {
     phoneNumber: string;
     otp: string;
     role: "CUSTOMER" | "PARTNER" | "RIDER";
+}
+
+export interface TokenPayload extends JwtPayload {
+    sub: string;
+    role: string;
+    sessionId: string;
 }
