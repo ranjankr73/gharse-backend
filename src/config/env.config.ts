@@ -76,10 +76,10 @@ const config = {
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: parseInt(process.env.REDIS_PORT),
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
-    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_EXPIRY,
-    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_EXPIRY,
-    ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY,
-    REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY,
+    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
+    ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY as `${number}${"s" | "m" | "h" | "d"}`,
+    REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY as `${number}${"s" | "m" | "h" | "d"}`,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 };
 
