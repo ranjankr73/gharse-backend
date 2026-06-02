@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import ms from "ms";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
@@ -14,7 +13,6 @@ import {
     RegisterInput,
     GoogleAuthInput,
     OTPAuthInput,
-    AuthTokenPayload,
 } from "./auth.types.js";
 
 import {
@@ -24,6 +22,7 @@ import {
 } from "../../shared/errors/index.js";
 
 import { generateOTP } from "../../shared/utils/otp.util.js";
+import { generateAccessToken, generateRefreshToken } from "./auth.utils.js";
 
 const googleClient = new OAuth2Client(config.GOOGLE_CLIENT_ID);
 
@@ -61,16 +60,10 @@ export const registerUser = async (userData: RegisterInput) => {
 
     const sessionId = crypto.randomUUID();
 
-    const refreshToken = jwt.sign(
-        {
-            sub: newUser.id,
-            role: newUser.role,
-            sessionId: sessionId,
-        } as AuthTokenPayload,
-        config.REFRESH_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.REFRESH_TOKEN_EXPIRY,
-        },
+    const refreshToken = generateRefreshToken(
+        newUser.id,
+        newUser.role,
+        sessionId,
     );
 
     const hashedRefreshToken = crypto
@@ -103,16 +96,10 @@ export const registerUser = async (userData: RegisterInput) => {
         session.id.toString(),
     );
 
-    const accessToken = jwt.sign(
-        {
-            sub: newUser.id,
-            role: newUser.role,
-            sessionId: session.id,
-        } as AuthTokenPayload,
-        config.ACCESS_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.ACCESS_TOKEN_EXPIRY,
-        },
+    const accessToken = generateAccessToken(
+        newUser.id,
+        newUser.role,
+        sessionId,
     );
 
     return {
@@ -164,16 +151,10 @@ export const loginUser = async (userData: LoginInput) => {
 
     const sessionId = crypto.randomUUID();
 
-    const refreshToken = jwt.sign(
-        {
-            sub: existingUser.id,
-            role: existingUser.role,
-            sessionId: sessionId,
-        } as AuthTokenPayload,
-        config.REFRESH_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.REFRESH_TOKEN_EXPIRY,
-        },
+    const refreshToken = generateRefreshToken(
+        existingUser.id,
+        existingUser.role,
+        sessionId,
     );
 
     const hashedRefreshToken = crypto
@@ -206,16 +187,10 @@ export const loginUser = async (userData: LoginInput) => {
         session.id.toString(),
     );
 
-    const accessToken = jwt.sign(
-        {
-            sub: existingUser.id,
-            role: existingUser.role,
-            sessionId: session.id,
-        } as AuthTokenPayload,
-        config.ACCESS_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.ACCESS_TOKEN_EXPIRY,
-        },
+    const accessToken = generateAccessToken(
+        existingUser.id,
+        existingUser.role,
+        sessionId,
     );
 
     return {
@@ -276,16 +251,10 @@ export const authenticateWithGoogle = async (userData: GoogleAuthInput) => {
 
     const sessionId = crypto.randomUUID();
 
-    const refreshToken = jwt.sign(
-        {
-            sub: existingUser.id,
-            role: existingUser.role,
-            sessionId: sessionId,
-        } as AuthTokenPayload,
-        config.REFRESH_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.REFRESH_TOKEN_EXPIRY,
-        },
+    const refreshToken = generateRefreshToken(
+        existingUser.id,
+        existingUser.role,
+        sessionId,
     );
 
     const hashedRefreshToken = crypto
@@ -318,16 +287,10 @@ export const authenticateWithGoogle = async (userData: GoogleAuthInput) => {
         session.id.toString(),
     );
 
-    const accessToken = jwt.sign(
-        {
-            sub: existingUser.id,
-            role: existingUser.role,
-            sessionId: session.id,
-        } as AuthTokenPayload,
-        config.ACCESS_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.ACCESS_TOKEN_EXPIRY,
-        },
+    const accessToken = generateAccessToken(
+        existingUser.id,
+        existingUser.role,
+        sessionId,
     );
 
     return {
@@ -417,16 +380,10 @@ export const authenticateWithPhoneOTP = async (userData: OTPAuthInput) => {
 
     const sessionId = crypto.randomUUID();
 
-    const refreshToken = jwt.sign(
-        {
-            sub: existingUser.id,
-            role: existingUser.role,
-            sessionId: sessionId,
-        } as AuthTokenPayload,
-        config.REFRESH_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.REFRESH_TOKEN_EXPIRY,
-        },
+    const refreshToken = generateRefreshToken(
+        existingUser.id,
+        existingUser.role,
+        sessionId,
     );
 
     const hashedRefreshToken = crypto
@@ -459,16 +416,10 @@ export const authenticateWithPhoneOTP = async (userData: OTPAuthInput) => {
         session.id.toString(),
     );
 
-    const accessToken = jwt.sign(
-        {
-            sub: existingUser.id,
-            role: existingUser.role,
-            sessionId: session.id,
-        } as AuthTokenPayload,
-        config.ACCESS_TOKEN_SECRET as jwt.Secret,
-        {
-            expiresIn: config.ACCESS_TOKEN_EXPIRY,
-        },
+    const accessToken = generateAccessToken(
+        existingUser.id,
+        existingUser.role,
+        sessionId,
     );
 
     return {
