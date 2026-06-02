@@ -1,14 +1,21 @@
 import { Router } from "express";
-import { login, register } from "./auth.controller.js";
+import {
+    login,
+    register,
+    googleAuth,
+    verifyPhoneOTP,
+    sendPhoneOTP,
+} from "./auth.controller.js";
 
 const router = Router();
 
 router.post("/register", register); // Only for Email and Password
 router.post("/login", login); // Only for Email and Password
+router.post("/google", googleAuth); // Google Social Auth (Login or Register)
+router.post("/send-otp", sendPhoneOTP); // Send OTP for Phone Authentication
+router.post("/verify-otp", verifyPhoneOTP); // Verify OTP and Authenticate
 
 export default router;
-
-// Login -> Email/Password, Social Login (Google, Facebook, etc.) and OTP-based Login (Phone Number)
 
 // Logout
 // Refresh Token

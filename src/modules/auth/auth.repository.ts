@@ -36,3 +36,11 @@ export const createSession = async (data: {
         data,
     });
 };
+
+export const findUserByPhoneNumber = async (phoneNumber: string) => {
+    return prisma.user.findUnique({
+        where: {
+            phone: phoneNumber,
+        },
+    });
+};

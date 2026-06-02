@@ -74,6 +74,7 @@ enum Role {
 enum AuthProvider {
     LOCAL
     GOOGLE
+    OTP
 }
 
 enum SessionType {

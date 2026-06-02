@@ -34,3 +34,9 @@ export interface GoogleAuthInput extends ClientInfo {
     googleToken: string;
     role: "CUSTOMER" | "PARTNER" | "RIDER";
 }
+
+export interface OTPAuthInput extends ClientInfo {
+    phoneNumber: string;
+    otp: string;
+    role: "CUSTOMER" | "PARTNER" | "RIDER";
+}
