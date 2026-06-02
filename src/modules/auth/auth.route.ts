@@ -1,13 +1,12 @@
 import { Router } from "express";
-import { register } from "./auth.controller.js";
+import { login, register } from "./auth.controller.js";
 
 const router = Router();
 
-router.post("/register", register);
+router.post("/register", register); // Only for Email and Password
+router.post("/login", login); // Only for Email and Password
 
 export default router;
-
-// Register -> Only for Email and Password
 
 // Login -> Email/Password, Social Login (Google, Facebook, etc.) and OTP-based Login (Phone Number)
 

@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { registerUser } from "./auth.service.js";
+import ms from "ms";
+import config from "../../config/env.config.js";
+import { registerUser, loginUser } from "./auth.service.js";
 
 export const register = async (
     req: Request,
@@ -8,19 +10,19 @@ export const register = async (
 ) => {
     try {
         const result = await registerUser({
-            fullName: req.body.fullName,
+            name: req.body.name,
             email: req.body.email,
             password: req.body.password,
             role: req.body.role,
-            ipAddress: req.ip || req.connection.remoteAddress || "Unknown",
+            ipAddress: req.ip || "unknown",
             userAgent: req.headers["user-agent"] || "Unknown",
         });
 
         res.cookie("refreshToken", result.refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: config.NODE_ENV === "production",
             sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: ms(config.REFRESH_TOKEN_EXPIRY),
         });
 
         res.status(201).json({
@@ -30,7 +32,39 @@ export const register = async (
                 token: result.accessToken,
             },
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        next(error);
+    }
+};
+
+export const login = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const result = await loginUser({
+            email: req.body.email,
+            password: req.body.password,
+            ipAddress: req.ip || "unknown",
+            userAgent: req.headers["user-agent"] || "unknown",
+        });
+
+        res.cookie("refreshToken", result.refreshToken, {
+            httpOnly: true,
+            secure: config.NODE_ENV === "production",
+            sameSite: "none",
+            maxAge: ms(config.REFRESH_TOKEN_EXPIRY),
+        });
+
+        res.status(200).json({
+            message: "User logged in successfully",
+            data: {
+                user: result.user,
+                token: result.accessToken,
+            },
+        });
+    } catch (error: unknown) {
         next(error);
     }
 };

@@ -8,18 +8,19 @@ import config from "../../config/env.config.js";
 
 import * as authRepository from "./auth.repository.js";
 
-import { RegisterInput } from "./auth.types.js";
+import { LoginInput, RegisterInput } from "./auth.types.js";
 import { Role } from "../../../generated/prisma/client.js";
 
 import { ValidationError } from "../../shared/errors/ValidationError.js";
 import { ConflictError } from "../../shared/errors/ConflictError.js";
+import { UnauthorizedError } from "../../shared/errors/UnauthorizedError.js";
 
 export const registerUser = async (userData: RegisterInput) => {
-    const { fullName, email, password, role, ipAddress, userAgent } = userData;
+    const { name, email, password, role, ipAddress, userAgent } = userData;
 
-    if (!fullName || !email || !password || !role) {
+    if (!name || !email || !password || !role) {
         throw new ValidationError({
-            fullName: !fullName ? ["Full name is required"] : [],
+            name: !name ? ["Name is required"] : [],
             email: !email ? ["Email is required"] : [],
             password: !password ? ["Password is required"] : [],
             role: !role ? ["Role is required"] : [],
@@ -39,7 +40,7 @@ export const registerUser = async (userData: RegisterInput) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const newUser = await authRepository.createUser({
-        name: fullName,
+        name: name,
         email,
         password: hashedPassword,
         role: role as Role,
@@ -59,10 +60,6 @@ export const registerUser = async (userData: RegisterInput) => {
         .createHash("sha256")
         .update(refreshToken)
         .digest("hex");
-
-    console.log("Refresh Token expires in:", config.REFRESH_TOKEN_EXPIRY); // Log 7
-
-    console.log("Refresh Token expires in:", ms(config.REFRESH_TOKEN_EXPIRY)); // Log 7
 
     const session = await authRepository.createSession({
         id: sessionId,
@@ -103,6 +100,100 @@ export const registerUser = async (userData: RegisterInput) => {
             name: newUser.name,
             email: newUser.email,
             role: newUser.role,
+        },
+        accessToken,
+        refreshToken,
+    };
+};
+
+export const loginUser = async (userData: LoginInput) => {
+    const { email, password, ipAddress, userAgent } = userData;
+
+    if (!email || !password) {
+        throw new ValidationError({
+            email: !email ? ["Email is required"] : [],
+            password: !password ? ["Password is required"] : [],
+        });
+    }
+
+    const existingUser = await authRepository.findUserByEmail(email);
+    if (!existingUser) {
+        throw new UnauthorizedError({
+            message: "Invalid email or password",
+        });
+    }
+
+    if (!existingUser.password) {
+        throw new UnauthorizedError({
+            message:
+                "This account uses Google sign-in. Please continue with Google.",
+        });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(
+        password,
+        existingUser.password,
+    );
+    if (!isPasswordCorrect) {
+        throw new UnauthorizedError({
+            message: "Invalid email or password",
+        });
+    }
+
+    const sessionId = crypto.randomUUID();
+
+    const refreshToken = jwt.sign(
+        { id: existingUser.id, role: existingUser.role, session: sessionId },
+        config.REFRESH_TOKEN_SECRET as jwt.Secret,
+        {
+            expiresIn: config.REFRESH_TOKEN_EXPIRY,
+        },
+    );
+
+    const hashedRefreshToken = crypto
+        .createHash("sha256")
+        .update(refreshToken)
+        .digest("hex");
+
+    const session = await authRepository.createSession({
+        id: sessionId,
+        userId: existingUser.id,
+        refreshTokenHash: hashedRefreshToken,
+        ipAddress,
+        userAgent,
+        expiresAt: new Date(Date.now() + ms(config.REFRESH_TOKEN_EXPIRY)),
+    });
+
+    const redisData = await redis.set(
+        `session:${session.id.toString()}`,
+        JSON.stringify({
+            userId: existingUser.id,
+            role: existingUser.role,
+            isRevoked: false,
+        }),
+        "EX",
+        7 * 24 * 60 * 60,
+    );
+
+    await redis.sadd(
+        `user:${existingUser.id.toString()}:sessions`,
+        session.id.toString(),
+    );
+
+    const accessToken = jwt.sign(
+        { id: existingUser.id, role: existingUser.role, session: session.id },
+        config.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: config.ACCESS_TOKEN_EXPIRY,
+        },
+    );
+
+    return {
+        user: {
+            id: existingUser.id,
+            name: existingUser.name,
+            email: existingUser.email,
+            role: existingUser.role,
         },
         accessToken,
         refreshToken,
