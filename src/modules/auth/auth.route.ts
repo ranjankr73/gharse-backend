@@ -5,6 +5,7 @@ import {
     googleAuth,
     verifyPhoneOTP,
     sendPhoneOTP,
+    rotateToken,
 } from "./auth.controller.js";
 
 const router = Router();
@@ -14,6 +15,7 @@ router.post("/login", login); // Only for Email and Password
 router.post("/google", googleAuth); // Google Social Auth (Login or Register)
 router.post("/send-otp", sendPhoneOTP); // Send OTP for Phone Authentication
 router.post("/verify-otp", verifyPhoneOTP); // Verify OTP and Authenticate
+router.post("/rotate-token", rotateToken); // Rotate access token and refresh token
 
 export default router;
 

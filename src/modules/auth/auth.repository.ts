@@ -44,3 +44,36 @@ export const findUserByPhoneNumber = async (phoneNumber: string) => {
         },
     });
 };
+
+export const findSessionById = async (id: string) => {
+    return prisma.session.findUnique({
+        where: {
+            id,
+        },
+    });
+};
+
+export const revokeSession = async (id: string) => {
+    return prisma.session.update({
+        where: { id },
+        data: {
+            isRevoked: true,
+            revokedAt: new Date(),
+        },
+    });
+};
+
+export const updateSession = async (
+    id: string,
+    data: {
+        refreshTokenHash?: string;
+        lastUsedAt?: Date;
+        expiresAt?: Date;
+        isRevoked?: boolean;
+    },
+) => {
+    return prisma.session.update({
+        where: { id },
+        data,
+    });
+};

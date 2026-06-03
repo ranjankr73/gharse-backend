@@ -7,6 +7,7 @@ import {
     authenticateWithGoogle,
     sendPhoneAuthOTP,
     authenticateWithPhoneOTP,
+    issueTokens,
 } from "./auth.service.js";
 
 export const register = async (
@@ -150,6 +151,34 @@ export const verifyPhoneOTP = async (
             message: "User logged in successfully",
             data: {
                 user: result.user,
+                token: result.accessToken,
+            },
+        });
+    } catch (error: unknown) {
+        next(error);
+    }
+};
+
+export const rotateToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const result = await issueTokens({
+            refreshToken: req.cookies.refreshToken,
+        });
+
+        res.cookie("refreshToken", result.refreshToken, {
+            httpOnly: true,
+            secure: config.NODE_ENV === "production",
+            sameSite: "none",
+            maxAge: ms(config.REFRESH_TOKEN_EXPIRY),
+        });
+
+        res.status(200).json({
+            message: "Token rotated successfully",
+            data: {
                 token: result.accessToken,
             },
         });
