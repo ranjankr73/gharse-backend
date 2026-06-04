@@ -1,0 +1,27 @@
+1. Add Global Error Middleware
+
+-> src/middlewares/error.middleware.ts
+-> app.use(errorHandler); at bottom of app.ts
+
+2. Add Shared Types
+
+-> src/shared/Types
+    -> api-response.type.ts
+    -> jwt-payload.type.ts
+    -> request-user.type.ts
+    -> pagination.type.ts
+
+3. Add Repository Interfaces
+
+-> Example: export interface IAuthRepository {
+    findUserByEmail(email: string): Promise<User | null>;
+}
+
+4. Split Auth Utilites
+
+-> auth/
+    -> utils/
+        -> jwt.util.ts
+        -> password.util.ts 
+        -> cookie.util.ts
+        -> session.util.ts
