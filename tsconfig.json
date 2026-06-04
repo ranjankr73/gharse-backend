@@ -1,39 +1,50 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "compilerOptions": {
+        "target": "esnext",
 
-    "rootDir": ".",
-    "outDir": "./dist",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
 
-    "strict": true,
+        "rootDir": ".",
+        "outDir": "./dist",
 
-    "allowJs": true,
-    "checkJs": false,
+        "strict": true,
 
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "strictPropertyInitialization": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
 
-    "resolveJsonModule": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
 
-    "sourceMap": true,
+        "exactOptionalPropertyTypes": true,
+        "noUncheckedIndexedAccess": true,
 
-    "skipLibCheck": true,
-    
-    "types": ["node"],
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
 
-    // "forceConsistentCasingInFileNames": true,
-  },
+        "resolveJsonModule": true,
 
-  "include": [
-    "src/**/*",
-    "server.js",
-    "scripts/**/*"
-  ],
+        "sourceMap": true,
 
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+        "skipLibCheck": true,
+
+        "types": ["node"],
+
+        "forceConsistentCasingInFileNames": true,
+
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+
+    "include": ["src/**/*", "server.ts"],
+
+    "exclude": ["node_modules", "dist"]
 }
