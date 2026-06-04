@@ -2,85 +2,76 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-if (!process.env.PORT) {
-    throw new Error("PORT is not defined in environment variable");
+type NodeEnv = "development" | "production" | "test";
+type Duration = `${number}${"s" | "m" | "h" | "d"}`;
+
+function getEnv(name: string): string {
+    const value = process.env[name];
+
+    if (!value) {
+        throw new Error(`Missing environment variable: ${name}`);
+    }
+
+    return value;
 }
 
-if (!process.env.NODE_ENV) {
-    throw new Error("NODE_ENV is not defined in environment variable");
+function getNodeEnv(): NodeEnv {
+    const env = getEnv("NODE_ENV");
+
+    if (env !== "development" && env !== "production" && env !== "test") {
+        throw new Error("NODE_ENV must be development, production, or test");
+    }
+
+    return env;
 }
 
-if (!process.env.CLIENT_ORIGIN) {
-    throw new Error("CLIENT_ORIGIN is not defined in environment variable");
+function getNumberEnv(name: string): number {
+    const value = getEnv(name);
+    const parsed = Number(value);
+
+    if (Number.isNaN(parsed)) {
+        throw new Error(`${name} must be a valid number`);
+    }
+
+    return parsed;
 }
 
-if (!process.env.MONGODB_URI) {
-    throw new Error("MONGODB_URI is not defined in environment variable");
-}
+function getDurationEnv(name: string): Duration {
+    const value = getEnv(name);
 
-if(!process.env.POSTGRES_URI){
-    throw new Error("POSTGRES_URI is not defined in environment variable");
-}
+    if (!/^\d+[smhd]$/.test(value)) {
+        throw new Error(`${name} must be in format like 15m, 7d, 30s, 1h`);
+    }
 
-if (!process.env.REDIS_URL) {
-    throw new Error("REDIS_URL is not defined in environment variable");
-}
-
-if (!process.env.REDIS_HOST) {
-    throw new Error("REDIS_HOST is not defined in environment variable");
-}
-
-if (!process.env.REDIS_PORT) {
-    throw new Error("REDIS_PORT is not defined in environment variable");
-}
-
-// if (!process.env.REDIS_PASSWORD) {
-//     throw new Error("REDIS_PASSWORD is not defined in environment variable");
-// }
-
-if (!process.env.ACCESS_TOKEN_SECRET) {
-    throw new Error(
-        "ACCESS_TOKEN_SECRET is not defined in environment variable",
-    );
-}
-
-if (!process.env.REFRESH_TOKEN_SECRET) {
-    throw new Error(
-        "REFRESH_TOKEN_SECRET is not defined in environment variable",
-    );
-}
-
-if (!process.env.ACCESS_TOKEN_EXPIRY) {
-    throw new Error(
-        "ACCESS_TOKEN_EXPIRY is not defined in environment variable",
-    );
-}
-
-if (!process.env.REFRESH_TOKEN_EXPIRY) {
-    throw new Error(
-        "REFRESH_TOKEN_EXPIRY is not defined in environment variable",
-    );
-}
-
-if (!process.env.GOOGLE_CLIENT_ID) {
-    throw new Error("GOOGLE_CLIENT_ID is not defined in environment variable");
+    return value as Duration;
 }
 
 const config = {
-    PORT: process.env.PORT,
-    NODE_ENV: process.env.NODE_ENV,
-    CLIENT_ORIGIN: process.env.CLIENT_ORIGIN,
-    MONGODB_URI: process.env.MONGODB_URI,
-    POSTGRES_URI: process.env.POSTGRES_URI,
-    REDIS_URL: process.env.REDIS_URL,
-    REDIS_HOST: process.env.REDIS_HOST,
-    REDIS_PORT: parseInt(process.env.REDIS_PORT),
+    PORT: getNumberEnv("PORT"),
+
+    NODE_ENV: getNodeEnv(),
+
+    CLIENT_ORIGIN: getEnv("CLIENT_ORIGIN"),
+
+    POSTGRES_URI: getEnv("POSTGRES_URI"),
+
+    REDIS_URL: getEnv("REDIS_URL"),
+
+    REDIS_HOST: getEnv("REDIS_HOST"),
+
+    REDIS_PORT: getNumberEnv("REDIS_PORT"),
+
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
-    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
-    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
-    ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY as `${number}${"s" | "m" | "h" | "d"}`,
-    REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY as `${number}${"s" | "m" | "h" | "d"}`,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-};
+
+    ACCESS_TOKEN_SECRET: getEnv("ACCESS_TOKEN_SECRET"),
+
+    REFRESH_TOKEN_SECRET: getEnv("REFRESH_TOKEN_SECRET"),
+
+    ACCESS_TOKEN_EXPIRY: getDurationEnv("ACCESS_TOKEN_EXPIRY"),
+
+    REFRESH_TOKEN_EXPIRY: getDurationEnv("REFRESH_TOKEN_EXPIRY"),
+
+    GOOGLE_CLIENT_ID: getEnv("GOOGLE_CLIENT_ID"),
+} as const;
 
 export default config;
