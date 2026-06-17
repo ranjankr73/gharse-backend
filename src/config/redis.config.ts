@@ -1,18 +1,25 @@
-import { Redis } from "ioredis";
+import { Redis, RedisOptions } from "ioredis";
 import config from "./env.config.js";
 
-const redis = new Redis(config.REDIS_URL, {
+const redisOptions: RedisOptions = {
     maxRetriesPerRequest: null,
-
     retryStrategy(times: number) {
         const delay = Math.min(times * 100, 3000);
         return delay;
     },
-
     enableReadyCheck: true,
-});
+};
 
-// const redis = new Redis(config.REDIS_URL);
+const redis =
+    config.REDIS_URL.startsWith("redis://") ||
+    config.REDIS_URL.startsWith("rediss://")
+        ? new Redis(config.REDIS_URL, redisOptions)
+        : new Redis({
+              host: config.REDIS_HOST,
+              port: config.REDIS_PORT,
+              password: config.REDIS_PASSWORD,
+              ...redisOptions,
+          });
 
 redis.on("connect", () => {
     console.log("✅ Redis connected");
