@@ -1,32 +1,31 @@
 model Order {
-    id                 String               @id @default(uuid())
-    customerId         String
-    restaurantId       String
-    riderId            String?
-    couponId           String?
-    status             OrderStatus          @default(PENDING)
-    subTotal           Decimal              @db.Decimal(10, 2)
-    deliveryFee        Decimal              @db.Decimal(10, 2)
-    tax                Decimal              @db.Decimal(10, 2)
-    discount           Decimal              @default(0) @db.Decimal(10, 2)
-    finalAmount        Decimal              @db.Decimal(10, 2)
-    deliveryAddressId  String
-    paymentId          String               @unique
-    deliverySnapshot   Json
-    specialNote        String?              @db.Text
-    orderedAt          DateTime             @default(now()) @db.Timestamp()
-    updatedAt          DateTime             @updatedAt
-    orderItems         OrderItem[]
-    statusHistory      OrderStatusHistory[]
-    couponUsage        CouponUsage?
-    deliveryAssignment DeliveryAssignment?
-    customer           User                 @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-    restaurant         Restaurant           @relation(fields: [restaurantId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-    rider              Rider?               @relation(fields: [riderId], references: [id], onUpdate: Cascade, onDelete: SetNull)
-    coupon             Coupon?              @relation(fields: [couponId], references: [id], onUpdate: Cascade, onDelete: SetNull)
-    deliveryAddress    Address              @relation(fields: [deliveryAddressId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-    payment            Payment              @relation(fields: [paymentId], references: [id], onUpdate: Cascade, onDelete: Restrict)
-    review             Review?
+    id                  String               @id @default(uuid())
+    customerId          String
+    restaurantId        String
+    riderId             String?
+    couponId            String?
+    status              OrderStatus          @default(PENDING)
+    subTotal            Decimal              @db.Decimal(10, 2)
+    deliveryFee         Decimal              @db.Decimal(10, 2)
+    tax                 Decimal              @db.Decimal(10, 2)
+    discount            Decimal              @default(0) @db.Decimal(10, 2)
+    finalAmount         Decimal              @db.Decimal(10, 2)
+    deliveryAddressId   String
+    deliverySnapshot    Json
+    specialNote         String?              @db.Text
+    orderedAt           DateTime             @default(now()) @db.Timestamp()
+    updatedAt           DateTime             @updatedAt
+    orderItems          OrderItem[]
+    statusHistory       OrderStatusHistory[]
+    couponUsage         CouponUsage?
+    customer            User                 @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    restaurant          Restaurant           @relation(fields: [restaurantId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    rider               Rider?               @relation(fields: [riderId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+    coupon              Coupon?              @relation(fields: [couponId], references: [id], onUpdate: Cascade, onDelete: SetNull)
+    deliveryAddress     Address              @relation(fields: [deliveryAddressId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    review              Review?
+    payments            Payment[]
+    deliveryAssignments DeliveryAssignment[]
 
     @@index([customerId])
     @@index([restaurantId])

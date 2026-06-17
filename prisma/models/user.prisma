@@ -62,6 +62,7 @@ model Address {
     orders    Order[]
 
     @@index([userId])
+    @@index([latitude, longitude])
 }
 
 enum Role {

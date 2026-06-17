@@ -40,6 +40,7 @@ model FoodItem {
 
     @@index([restaurantId])
     @@index([categoryId])
+    @@index([restaurantId, categoryId])
     @@index([isAvailable, isActive])
     @@index([isVeg])
     @@index([price])

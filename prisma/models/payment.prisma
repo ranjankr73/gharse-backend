@@ -1,6 +1,7 @@
 model Payment {
     id              String        @id @default(uuid())
     customerId      String
+    orderId         String
     amount          Decimal       @db.Decimal(10, 2)
     currency        String        @default("INR") @db.VarChar(3)
     method          PaymentMethod
@@ -9,11 +10,11 @@ model Payment {
     gatewayResponse Json?
     paidAt          DateTime?     @db.Timestamp()
     failureReason   String?       @db.Text
-    order           Order?
-    refund          Refund?
+    refunds         Refund[]
     createdAt       DateTime      @default(now()) @db.Timestamp()
     updatedAt       DateTime      @updatedAt
     customer        User          @relation(fields: [customerId], references: [id], onUpdate: Cascade, onDelete: Restrict)
+    order           Order         @relation(fields: [orderId], references: [id], onUpdate: Cascade, onDelete: Restrict)
 
     @@index([customerId])
     @@index([status])
@@ -24,7 +25,7 @@ model Payment {
 
 model Refund {
     id              String       @id @default(uuid())
-    paymentId       String       @unique
+    paymentId       String
     amount          Decimal      @db.Decimal(10, 2)
     reason          String       @db.Text
     status          RefundStatus @default(PENDING)

@@ -27,7 +27,7 @@ model Rider {
 
 model DeliveryAssignment {
     id                 String         @id @default(uuid())
-    orderId            String         @unique
+    orderId            String         
     riderId            String
     status             DeliveryStatus @default(ASSIGNED)
     assignedAt         DateTime       @default(now()) @db.Timestamp()
